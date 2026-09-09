@@ -9,14 +9,11 @@ document.addEventListener('DOMContentLoaded', function () {
     card.className = 'tour-card';
     card.setAttribute('data-tour', 'salalah');
     card.innerHTML = `
-        <a href="/Tours/salalah" class="tour-image" aria-label="Explore Salalah tour package" style="display:block;text-decoration:none;color:inherit">
-            <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Wadi%20Darbat%20salalah.jpg?width=900" alt="Salalah Oman during Khareef season" loading="lazy">
-            <div class="tour-badge">Featured</div>
+        <a href="/Tours/salalah" class="tour-image" aria-label="Salalah" style="display:block;text-decoration:none;color:inherit">
+            <img src="/Tours/salalah/assets/hero-september/01-1920.webp" alt="Salalah" loading="lazy">
         </a>
         <div class="tour-content">
             <h3><a href="/Tours/salalah" style="color:inherit;text-decoration:none">Salalah</a></h3>
-            <p>Discover Salalah's green Khareef landscapes, waterfalls, beaches and guided sightseeing with Skymundo.</p>
-            <a href="/Tours/salalah" class="btn btn-primary"><i class="fas fa-map-marked-alt"></i> Explore Salalah</a>
         </div>`;
-    grid.prepend(card);
+    grid.append(card);
 });
