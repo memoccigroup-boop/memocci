@@ -1,0 +1,46 @@
+name: Salalah transfer verification
+
+on:
+  push:
+    branches: [salalah-exact-deploy]
+    paths:
+      - '.github/workflows/salalah-transfer-debug.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect-transfer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect exact archive transfer page
+        shell: bash
+        env:
+          SHARE_URL: https://firestorage.ai/ja/f/YRo-2X4hIacV
+        run: |
+          set -euo pipefail
+          curl -L --fail --silent --show-error \
+            -A 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/140 Safari/537.36' \
+            -D headers.txt -o page.html "$SHARE_URL"
+          echo "HTTP headers:"
+          sed -n '1,80p' headers.txt
+          echo "Page bytes: $(wc -c < page.html)"
+          echo "Candidate links/endpoints:"
+          python3 - <<'PY'
+          import re, html
+          s=open('page.html','r',encoding='utf-8',errors='replace').read()
+          patterns=[r'href=["\']([^"\']+)', r'src=["\']([^"\']+)', r'https?://[^"\'<> ]+']
+          found=[]
+          for p in patterns:
+              for m in re.finditer(p,s,re.I):
+                  u=html.unescape(m.group(1) if m.groups() else m.group(0))
+                  if any(k in u.lower() for k in ('download','file','api','zip','tSRbYYFK5Xz0Yug8'.lower(),'YRo-2X4hIacV'.lower())):
+                      if u not in found: found.append(u)
+          for u in found[:120]: print(u)
+          print('--- HTML markers ---')
+          for line in s.splitlines():
+              low=line.lower()
+              if any(k in low for k in ('download','skymundo-salalah','37200839','01a0880da57677fbad857904423a81ed','tsrbyyfk5xz0yug8')):
+                  print(line[:2000])
+          PY
