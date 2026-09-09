@@ -1,4 +1,4 @@
-name: Salalah transfer verification
+name: Salalah exact deployment
 
 on:
   push:
@@ -8,60 +8,196 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  inspect-transfer:
+  deploy-exact-salalah:
     runs-on: ubuntu-latest
     steps:
-      - name: Inspect client chunks and API hints
+      - name: Check out staging branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download exact archive through its share page
         shell: bash
         run: |
           set -euo pipefail
-          BASE='https://firestorage.ai'
-          PAGE="$BASE/ja/f/YRo-2X4hIacV"
-          UA='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/140 Safari/537.36'
-          curl -L --fail --silent --show-error -A "$UA" -o page.html "$PAGE"
-          python3 - <<'PY' > scripts.txt
-          import re, html
-          s=open('page.html',encoding='utf-8',errors='replace').read()
-          seen=[]
-          for m in re.finditer(r'<script[^>]+src="([^"]+)"',s,re.I):
-              u=html.unescape(m.group(1))
-              if u not in seen: seen.append(u)
-          for u in seen: print(u)
-          PY
-          echo "scripts: $(wc -l < scripts.txt)"
-          mkdir chunks
-          n=0
-          while IFS= read -r path; do
-            n=$((n+1))
-            enc=$(python3 - <<PY
-          import urllib.parse
-          print(urllib.parse.quote('''$path''', safe='/:._-'))
-          PY
-          )
-            curl -L --fail --silent --show-error -A "$UA" -o "chunks/$n.js" "$BASE$enc" || true
-          done < scripts.txt
+          python3 -m pip install --quiet selenium
           python3 - <<'PY'
-          import pathlib,re
-          terms=('download','presign','signed','file_id','public_id','share_id','api/','/api','token','expires','storage','blob')
-          for p in sorted(pathlib.Path('chunks').glob('*.js')):
-              s=p.read_text(encoding='utf-8',errors='replace')
-              hits=[]
-              for term in terms:
-                  if term.lower() in s.lower(): hits.append(term)
-              if hits:
-                  print('\nFILE',p,'bytes',len(s),'hits',hits)
-                  printed=0
-                  for m in re.finditer(r'(download|presign|signed|file_id|public_id|share_id|/api|api/|token|expires)',s,re.I):
-                      a=max(0,m.start()-700); b=min(len(s),m.end()+1600)
-                      print(s[a:b])
-                      printed+=1
-                      if printed>=20: break
-          print('\nPAGE STATE HINTS')
-          ps=pathlib.Path('page.html').read_text(encoding='utf-8',errors='replace')
-          for m in re.finditer(r'(download|file_id|public_id|share_id|37200839|skymundo-salalah|YRo-2X4hIacV|tSRbYYFK5Xz0Yug8)',ps,re.I):
-              a=max(0,m.start()-500); b=min(len(ps),m.end()+1200)
-              print(ps[a:b])
+          import os, time, json, hashlib, glob, urllib.request
+          from selenium import webdriver
+          from selenium.webdriver.common.by import By
+          from selenium.webdriver.chrome.options import Options
+          from selenium.webdriver.support.ui import WebDriverWait
+
+          SHARE_URL = 'https://firestorage.ai/ja/f/YRo-2X4hIacV'
+          EXPECTED_SHA256 = '621dc96b4f10f10df9ba2f8abb33398aec386d0de53c3bbef0a6283083e342ca'
+          EXPECTED_SIZE = 37200839
+          download_dir = os.path.abspath('salalah-download')
+          os.makedirs(download_dir, exist_ok=True)
+
+          options = Options()
+          options.add_argument('--headless=new')
+          options.add_argument('--no-sandbox')
+          options.add_argument('--disable-dev-shm-usage')
+          options.add_argument('--window-size=1440,1200')
+          options.set_capability('goog:loggingPrefs', {'performance': 'ALL'})
+          options.add_experimental_option('prefs', {
+              'download.default_directory': download_dir,
+              'download.prompt_for_download': False,
+              'download.directory_upgrade': True,
+              'safebrowsing.enabled': True,
+          })
+
+          driver = webdriver.Chrome(options=options)
+          driver.execute_cdp_cmd('Page.setDownloadBehavior', {
+              'behavior': 'allow',
+              'downloadPath': download_dir,
+          })
+
+          direct_urls = []
+          try:
+              driver.get(SHARE_URL)
+              WebDriverWait(driver, 45).until(
+                  lambda d: 'skymundo-salalah-exact-github-upload.zip' in d.page_source
+              )
+
+              print('Loaded share page:', driver.title)
+              print('Buttons/links:')
+              for elem in driver.find_elements(By.CSS_SELECTOR, 'button, a'):
+                  txt = (elem.text or '').strip()
+                  if txt:
+                      print('-', txt[:300])
+
+              target = None
+              for selector in [
+                  "button[class*='downloadButton']",
+                  "button",
+                  "a[class*='downloadButton']",
+                  "a",
+              ]:
+                  for elem in driver.find_elements(By.CSS_SELECTOR, selector):
+                      txt = (elem.text or '').strip().lower()
+                      if 'ダウンロード' in txt or 'download' in txt:
+                          target = elem
+                          break
+                  if target is not None:
+                      break
+              if target is None:
+                  raise RuntimeError('Could not find download control on share page')
+
+              driver.execute_script('arguments[0].scrollIntoView({block:"center"});', target)
+              driver.execute_script('arguments[0].click();', target)
+
+              deadline = time.time() + 150
+              chosen = None
+              while time.time() < deadline:
+                  files = [p for p in glob.glob(os.path.join(download_dir, '*'))
+                           if not p.endswith('.crdownload') and os.path.isfile(p)]
+                  for path in files:
+                      if os.path.getsize(path) == EXPECTED_SIZE:
+                          chosen = path
+                          break
+                  if chosen:
+                      break
+                  time.sleep(1)
+
+              for entry in driver.get_log('performance'):
+                  try:
+                      msg = json.loads(entry['message'])['message']
+                  except Exception:
+                      continue
+                  if msg.get('method') != 'Network.responseReceived':
+                      continue
+                  resp = msg.get('params', {}).get('response', {})
+                  url = resp.get('url', '')
+                  headers = {str(k).lower(): str(v) for k, v in (resp.get('headers') or {}).items()}
+                  ctype = headers.get('content-type', '').lower()
+                  dispo = headers.get('content-disposition', '').lower()
+                  if ('zip' in ctype or 'attachment' in dispo or 'skymundo-salalah' in url.lower()) and url.startswith('http'):
+                      direct_urls.append(url)
+
+              if chosen is None:
+                  print('Browser download did not materialize; candidate responses:')
+                  for u in direct_urls:
+                      print(u)
+                  for idx, url in enumerate(dict.fromkeys(direct_urls), 1):
+                      try:
+                          dst = os.path.join(download_dir, f'direct-{idx}.zip')
+                          req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+                          with urllib.request.urlopen(req, timeout=120) as r, open(dst, 'wb') as f:
+                              while True:
+                                  chunk = r.read(1024 * 1024)
+                                  if not chunk:
+                                      break
+                                  f.write(chunk)
+                          if os.path.getsize(dst) == EXPECTED_SIZE:
+                              chosen = dst
+                              break
+                      except Exception as exc:
+                          print('Direct candidate failed:', exc)
+
+              if chosen is None:
+                  raise RuntimeError('Exact archive was not downloaded')
+
+              h = hashlib.sha256()
+              with open(chosen, 'rb') as f:
+                  for chunk in iter(lambda: f.read(1024 * 1024), b''):
+                      h.update(chunk)
+              digest = h.hexdigest()
+              size = os.path.getsize(chosen)
+              print('Downloaded:', chosen)
+              print('Bytes:', size)
+              print('SHA256:', digest)
+              if size != EXPECTED_SIZE:
+                  raise RuntimeError(f'Archive size mismatch: {size} != {EXPECTED_SIZE}')
+              if digest != EXPECTED_SHA256:
+                  raise RuntimeError(f'Archive hash mismatch: {digest} != {EXPECTED_SHA256}')
+              os.replace(chosen, 'salalah-exact.zip')
+          finally:
+              driver.quit()
           PY
+
+      - name: Verify archive and replace only Tours/salalah
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import zipfile, hashlib, os, sys
+          archive='salalah-exact.zip'
+          expected_archive='621dc96b4f10f10df9ba2f8abb33398aec386d0de53c3bbef0a6283083e342ca'
+          expected_html='2fb58f12450510af042bac5dcf8e332d5f81207153d3bac2a81fb1fab8efea3e'
+
+          h=hashlib.sha256(open(archive,'rb').read()).hexdigest()
+          if h != expected_archive:
+              raise SystemExit(f'archive SHA mismatch: {h}')
+
+          with zipfile.ZipFile(archive) as z:
+              files=[i for i in z.infolist() if not i.is_dir()]
+              if len(files) != 331:
+                  raise SystemExit(f'expected 331 files, found {len(files)}')
+              for i in files:
+                  n=i.filename.replace('\\','/')
+                  if not n.startswith('Tours/salalah/') or '/..' in '/' + n or n.startswith('/'):
+                      raise SystemExit(f'unsafe/unexpected path: {n}')
+              names={i.filename.replace('\\','/') for i in files}
+              if 'Tours/salalah/index.html' not in names:
+                  raise SystemExit('missing Tours/salalah/index.html')
+          PY
+
+          rm -rf Tours/salalah
+          unzip -q salalah-exact.zip -d .
+          test "$(find Tours/salalah -type f | wc -l | tr -d ' ')" = "331"
+          test "$(sha256sum Tours/salalah/index.html | awk '{print $1}')" = "2fb58f12450510af042bac5dcf8e332d5f81207153d3bac2a81fb1fab8efea3e"
+
+          git status --short
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A Tours/salalah
+          if git diff --cached --quiet; then
+            echo 'No Salalah changes to commit.'
+          else
+            git commit -m 'Replace Salalah page with exact supplied landing page'
+            git push origin HEAD:salalah-exact-deploy
+          fi
