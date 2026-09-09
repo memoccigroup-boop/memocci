@@ -1,0 +1,44 @@
+name: Verify Salalah live
+
+on:
+  push:
+    branches: [salalah-exact-deploy]
+    paths:
+      - '.github/workflows/verify-salalah-live.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify live Salalah page and asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          PAGE='https://skymundo.ae/Tours/salalah/'
+          ASSET='https://skymundo.ae/Tours/salalah/assets/hero-september/01-1920.webp'
+          EXPECTED_PAGE='2fb58f12450510af042bac5dcf8e332d5f81207153d3bac2a81fb1fab8efea3e'
+          EXPECTED_ASSET='569e40ced87720f4c04b4ef3ecb319109d5faf12978c32264278aff827bca36b'
+          ok=0
+          for i in $(seq 1 30); do
+            rm -f live.html hero.webp page.headers asset.headers
+            page_code=$(curl -L -sS -D page.headers -o live.html -w '%{http_code}' "$PAGE" || true)
+            asset_code=$(curl -L -sS -D asset.headers -o hero.webp -w '%{http_code}' "$ASSET" || true)
+            page_sha=$(test -f live.html && sha256sum live.html | awk '{print $1}' || true)
+            asset_sha=$(test -f hero.webp && sha256sum hero.webp | awk '{print $1}' || true)
+            echo "attempt=$i page_http=$page_code page_bytes=$(test -f live.html && wc -c < live.html || echo 0) page_sha=$page_sha"
+            echo "attempt=$i asset_http=$asset_code asset_bytes=$(test -f hero.webp && wc -c < hero.webp || echo 0) asset_sha=$asset_sha"
+            if [ "$page_code" = "200" ] && [ "$asset_code" = "200" ] && [ "$page_sha" = "$EXPECTED_PAGE" ] && [ "$asset_sha" = "$EXPECTED_ASSET" ]; then
+              ok=1
+              break
+            fi
+            sleep 5
+          done
+          echo '--- page headers ---'
+          cat page.headers || true
+          echo '--- asset headers ---'
+          cat asset.headers || true
+          test "$ok" = "1"
