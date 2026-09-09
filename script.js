@@ -1,409 +1,125 @@
-// DOM Content Loaded
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize all functions
-    initHeroSlider();
-    initHeaderScroll();
-    initMobileMenu();
-    initSmoothScroll();
-    initContactForm();
-    initScrollAnimations();
-    initStatsCounter();
+// Skymundo website interactions
+document.addEventListener('DOMContentLoaded', () => {
+  initSalalahTourCard();
+  initHeroSlider();
+  initHeaderScroll();
+  initMobileMenu();
+  initSmoothScroll();
+  initContactForm();
+  initScrollAnimations();
+  initStatsCounter();
 });
 
-// Hero Slider
+// Keep Salalah discoverable inside the existing Tours section only.
+function initSalalahTourCard() {
+  const grid = document.querySelector('#tours .tours-grid');
+  if (!grid || grid.querySelector('[data-tour="salalah"]')) return;
+  const card = document.createElement('div');
+  card.className = 'tour-card';
+  card.dataset.tour = 'salalah';
+  card.innerHTML = `
+    <a href="/Tours/salalah" class="tour-image" aria-label="Explore Salalah tour package" style="display:block;text-decoration:none;color:inherit">
+      <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Wadi%20Darbat%20salalah.jpg?width=900" alt="Salalah Oman during Khareef season" loading="lazy">
+      <div class="tour-badge">Featured</div>
+    </a>
+    <div class="tour-content">
+      <h3><a href="/Tours/salalah" style="color:inherit;text-decoration:none">Salalah</a></h3>
+      <p>Discover Salalah's green Khareef landscapes, waterfalls, beaches and guided sightseeing with Skymundo.</p>
+      <a href="/Tours/salalah" class="btn btn-primary"><i class="fas fa-map-marked-alt"></i> Explore Salalah</a>
+    </div>`;
+  grid.prepend(card);
+}
+
 function initHeroSlider() {
-    const slides = document.querySelectorAll('.slide');
-    const dotsContainer = document.querySelector('.slider-dots');
-    let currentSlide = 0;
-    const totalSlides = slides.length;
-    let slideInterval;
-
-    // Create dots
-    slides.forEach((_, index) => {
-        const dot = document.createElement('span');
-        dot.classList.add('dot');
-        if (index === 0) dot.classList.add('active');
-        dot.addEventListener('click', () => goToSlide(index));
-        dotsContainer.appendChild(dot);
-    });
-
-    const dots = document.querySelectorAll('.dot');
-
-    function goToSlide(index) {
-        // Remove active class from current slide and dot
-        slides[currentSlide].classList.remove('active');
-        dots[currentSlide].classList.remove('active');
-
-        // Update current slide index
-        currentSlide = index;
-
-        // Add active class to new slide and dot
-        slides[currentSlide].classList.add('active');
-        dots[currentSlide].classList.add('active');
-
-        // Reset interval
-        resetInterval();
-    }
-
-    function nextSlide() {
-        const next = (currentSlide + 1) % totalSlides;
-        goToSlide(next);
-    }
-
-    function resetInterval() {
-        clearInterval(slideInterval);
-        slideInterval = setInterval(nextSlide, 5000);
-    }
-
-    // Start auto-slide
-    slideInterval = setInterval(nextSlide, 5000);
-
-    // Pause on hover
-    const heroSlider = document.querySelector('.hero-slider');
-    heroSlider.addEventListener('mouseenter', () => clearInterval(slideInterval));
-    heroSlider.addEventListener('mouseleave', resetInterval);
+  const slides = [...document.querySelectorAll('.slide')];
+  const dotsContainer = document.querySelector('.slider-dots');
+  if (!slides.length || !dotsContainer) return;
+  let current = 0, timer;
+  dotsContainer.innerHTML = '';
+  slides.forEach((_, i) => {
+    const dot = document.createElement('span');
+    dot.className = 'dot' + (i === 0 ? ' active' : '');
+    dot.addEventListener('click', () => go(i));
+    dotsContainer.appendChild(dot);
+  });
+  const dots = [...dotsContainer.querySelectorAll('.dot')];
+  const reset = () => { clearInterval(timer); timer = setInterval(() => go((current + 1) % slides.length), 5000); };
+  const go = i => {
+    slides[current].classList.remove('active'); dots[current].classList.remove('active');
+    current = i; slides[current].classList.add('active'); dots[current].classList.add('active'); reset();
+  };
+  reset();
+  const slider = document.querySelector('.hero-slider');
+  if (slider) { slider.addEventListener('mouseenter', () => clearInterval(timer)); slider.addEventListener('mouseleave', reset); }
 }
 
-// Header Scroll Effect
 function initHeaderScroll() {
-    const header = document.getElementById('header');
-    let lastScroll = 0;
-
-    window.addEventListener('scroll', () => {
-        const currentScroll = window.pageYOffset;
-
-        if (currentScroll > 100) {
-            header.classList.add('scrolled');
-        } else {
-            header.classList.remove('scrolled');
-        }
-
-        lastScroll = currentScroll;
-    });
+  const header = document.getElementById('header');
+  if (!header) return;
+  const update = () => header.classList.toggle('scrolled', window.pageYOffset > 100);
+  window.addEventListener('scroll', update, {passive:true}); update();
 }
 
-// Mobile Menu
 function initMobileMenu() {
-    const hamburger = document.getElementById('hamburger');
-    const navMenu = document.getElementById('navMenu');
-
-    hamburger.addEventListener('click', () => {
-        hamburger.classList.toggle('active');
-        navMenu.classList.toggle('active');
-        document.body.style.overflow = navMenu.classList.contains('active') ? 'hidden' : '';
-    });
-
-    // Close menu when clicking on a link
-    const navLinks = navMenu.querySelectorAll('a');
-    navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            hamburger.classList.remove('active');
-            navMenu.classList.remove('active');
-            document.body.style.overflow = '';
-        });
-    });
-
-    // Close menu when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!navMenu.contains(e.target) && !hamburger.contains(e.target)) {
-            hamburger.classList.remove('active');
-            navMenu.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-    });
+  const hamburger = document.getElementById('hamburger');
+  const nav = document.getElementById('navMenu');
+  if (!hamburger || !nav) return;
+  const close = () => { hamburger.classList.remove('active'); nav.classList.remove('active'); document.body.style.overflow = ''; };
+  hamburger.addEventListener('click', e => { e.stopPropagation(); hamburger.classList.toggle('active'); nav.classList.toggle('active'); document.body.style.overflow = nav.classList.contains('active') ? 'hidden' : ''; });
+  nav.querySelectorAll('a').forEach(a => a.addEventListener('click', close));
+  document.addEventListener('click', e => { if (!nav.contains(e.target) && !hamburger.contains(e.target)) close(); });
 }
 
-// Smooth Scroll
 function initSmoothScroll() {
-    const links = document.querySelectorAll('a[href^="#"]');
-
-    links.forEach(link => {
-        link.addEventListener('click', function(e) {
-            const href = this.getAttribute('href');
-            if (href === '#') return;
-
-            e.preventDefault();
-            const target = document.querySelector(href);
-
-            if (target) {
-                const headerHeight = document.getElementById('header').offsetHeight;
-                const topBarHeight = document.querySelector('.top-bar').offsetHeight;
-                const targetPosition = target.offsetTop - headerHeight - topBarHeight;
-
-                window.scrollTo({
-                    top: targetPosition,
-                    behavior: 'smooth'
-                });
-
-                // Update active nav link
-                document.querySelectorAll('.nav-menu a').forEach(navLink => {
-                    navLink.classList.remove('active');
-                });
-                this.classList.add('active');
-            }
-        });
+  document.querySelectorAll('a[href^="#"]').forEach(link => link.addEventListener('click', function(e) {
+    const href = this.getAttribute('href'); if (!href || href === '#') return;
+    const target = document.querySelector(href); if (!target) return;
+    e.preventDefault();
+    const header = document.getElementById('header'); const top = document.querySelector('.top-bar');
+    window.scrollTo({top: target.offsetTop - (header?.offsetHeight || 0) - (top?.offsetHeight || 0), behavior:'smooth'});
+    document.querySelectorAll('.nav-menu a').forEach(a => a.classList.remove('active')); this.classList.add('active');
+  }));
+  window.addEventListener('scroll', () => {
+    const y = window.pageYOffset + 200;
+    document.querySelectorAll('section[id]').forEach(section => {
+      if (y >= section.offsetTop && y < section.offsetTop + section.offsetHeight) {
+        document.querySelectorAll('.nav-menu a').forEach(a => { a.classList.toggle('active', a.getAttribute('href') === '#' + section.id); });
+      }
     });
-
-    // Update active nav link on scroll
-    window.addEventListener('scroll', () => {
-        const sections = document.querySelectorAll('section[id]');
-        const scrollPosition = window.pageYOffset + 200;
-
-        sections.forEach(section => {
-            const sectionTop = section.offsetTop;
-            const sectionHeight = section.offsetHeight;
-            const sectionId = section.getAttribute('id');
-
-            if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
-                document.querySelectorAll('.nav-menu a').forEach(link => {
-                    link.classList.remove('active');
-                    if (link.getAttribute('href') === '#' + sectionId) {
-                        link.classList.add('active');
-                    }
-                });
-            }
-        });
-    });
+  }, {passive:true});
 }
 
-// Contact Form
 function initContactForm() {
-    const form = document.getElementById('contactForm');
-
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            // Get form data
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData);
-
-            // Create WhatsApp message
-            const message = `Hello Skymundo Tourism,%0A%0A` +
-                `*New Inquiry - Get Offer*%0A%0A` +
-                `*Name:* ${data.name}%0A` +
-                `*Email:* ${data.email}%0A` +
-                `*Phone:* ${data.phone}%0A` +
-                `*Service:* ${getServiceName(data.service)}%0A` +
-                `*Message:* ${data.message || 'No additional message'}%0A%0A` +
-                `Please send me the best offer. Thank you!`;
-
-            // Open WhatsApp
-            window.open(`https://wa.me/971562168857?text=${message}`, '_blank');
-
-            // Reset form
-            form.reset();
-
-            // Show success message
-            showNotification('Thank you! Redirecting to WhatsApp...', 'success');
-        });
-    }
+  const form = document.getElementById('contactForm'); if (!form) return;
+  form.addEventListener('submit', e => {
+    e.preventDefault(); const d = Object.fromEntries(new FormData(form));
+    const msg = `Hello Skymundo Tourism,%0A%0A*New Inquiry - Get Offer*%0A%0A*Name:* ${d.name}%0A*Email:* ${d.email}%0A*Phone:* ${d.phone}%0A*Service:* ${getServiceName(d.service)}%0A*Message:* ${d.message || 'No additional message'}%0A%0APlease send me the best offer. Thank you!`;
+    window.open(`https://wa.me/971562168857?text=${msg}`, '_blank'); form.reset(); showNotification('Thank you! Redirecting to WhatsApp...', 'success');
+  });
 }
+function getServiceName(v){return ({flight:'Flight Booking',hotel:'Hotel Reservation',visa:'Visa Assistance',tour:'Tour Package',umrah:'Umrah Package',insurance:'Travel Insurance'})[v] || v;}
 
-function getServiceName(value) {
-    const services = {
-        'flight': 'Flight Booking',
-        'hotel': 'Hotel Reservation',
-        'visa': 'Visa Assistance',
-        'tour': 'Tour Package',
-        'umrah': 'Umrah Package',
-        'insurance': 'Travel Insurance'
-    };
-    return services[value] || value;
-}
-
-// Stats Counter Animation
 function initStatsCounter() {
-    const statNumbers = document.querySelectorAll('.stat-number');
-    let hasAnimated = false;
-
-    const observerOptions = {
-        threshold: 0.5,
-        rootMargin: '0px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting && !hasAnimated) {
-                hasAnimated = true;
-                statNumbers.forEach(stat => {
-                    const target = parseInt(stat.getAttribute('data-count'));
-                    animateCounter(stat, target);
-                });
-            }
-        });
-    }, observerOptions);
-
-    const statsSection = document.querySelector('.stats-section');
-    if (statsSection) {
-        observer.observe(statsSection);
-    }
+  const nums = [...document.querySelectorAll('.stat-number')], section = document.querySelector('.stats-section'); if (!section) return;
+  let done = false;
+  const obs = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting && !done) { done = true; nums.forEach(el => animateCounter(el, parseInt(el.dataset.count || '0',10))); obs.disconnect(); } }), {threshold:.5});
+  obs.observe(section);
 }
+function animateCounter(el,target){const duration=2000,step=target/(duration/16);let current=0;const label=el.nextElementSibling?.textContent||'';const timer=setInterval(()=>{current+=step;if(current>=target){el.textContent=formatNumber(target,label);clearInterval(timer)}else el.textContent=formatNumber(Math.floor(current),label)},16)}
+function formatNumber(n,label){if(label.includes('/7'))return n;if(n>=1000)return (n/1000).toFixed(0)+'K+';return n+(n===98?'%':'+')}
 
-function animateCounter(element, target) {
-    const duration = 2000;
-    const step = target / (duration / 16);
-    let current = 0;
-    const label = element.nextElementSibling ? element.nextElementSibling.textContent : '';
-
-    const timer = setInterval(() => {
-        current += step;
-        if (current >= target) {
-            element.textContent = formatNumber(target, label);
-            clearInterval(timer);
-        } else {
-            element.textContent = formatNumber(Math.floor(current), label);
-        }
-    }, 16);
-}
-
-function formatNumber(num, label) {
-    if (label && label.includes('/7')) {
-        return num;
-    }
-    if (num >= 1000) {
-        return (num / 1000).toFixed(0) + 'K+';
-    }
-    return num + (num === 98 ? '%' : '+');
-}
-
-// Scroll Animations
 function initScrollAnimations() {
-    const animatedElements = document.querySelectorAll('.service-card, .feature-card, .destination-card, .contact-item, .testimonial-card');
-
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-                observer.unobserve(entry.target);
-            }
-        });
-    }, observerOptions);
-
-    animatedElements.forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(30px)';
-        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        observer.observe(el);
-    });
+  if (!('IntersectionObserver' in window)) return;
+  const els = document.querySelectorAll('.service-card,.feature-card,.destination-card,.contact-item,.testimonial-card');
+  const obs = new IntersectionObserver(entries => entries.forEach(entry => {if(entry.isIntersecting){entry.target.style.opacity='1';entry.target.style.transform='translateY(0)';obs.unobserve(entry.target)}}),{threshold:.1,rootMargin:'0px 0px -50px 0px'});
+  els.forEach(el=>{el.style.opacity='0';el.style.transform='translateY(30px)';el.style.transition='opacity .6s ease, transform .6s ease';obs.observe(el)});
 }
 
-// Notification Function
-function showNotification(message, type = 'info') {
-    // Remove existing notifications
-    const existingNotification = document.querySelector('.notification');
-    if (existingNotification) {
-        existingNotification.remove();
-    }
-
-    // Create notification element
-    const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    notification.innerHTML = `
-        <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-info-circle'}"></i>
-        <span>${message}</span>
-    `;
-
-    // Add styles
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: ${type === 'success' ? '#00a86b' : '#0066cc'};
-        color: white;
-        padding: 15px 25px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-        z-index: 10000;
-        animation: slideIn 0.4s ease;
-        font-weight: 500;
-    `;
-
-    // Add animation keyframes
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        @keyframes slideOut {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-        }
-    `;
-    document.head.appendChild(style);
-
-    // Add to document
-    document.body.appendChild(notification);
-
-    // Remove after 3 seconds
-    setTimeout(() => {
-        notification.style.animation = 'slideOut 0.4s ease forwards';
-        setTimeout(() => notification.remove(), 400);
-    }, 3000);
+function showNotification(message,type='info') {
+  document.querySelector('.notification')?.remove(); const n=document.createElement('div'); n.className=`notification notification-${type}`; n.innerHTML=`<i class="fas ${type==='success'?'fa-check-circle':'fa-info-circle'}"></i><span>${message}</span>`;
+  n.style.cssText=`position:fixed;top:20px;right:20px;background:${type==='success'?'#00a86b':'#0066cc'};color:#fff;padding:15px 25px;border-radius:12px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 30px #0003;z-index:10000;font-weight:500`; document.body.appendChild(n); setTimeout(()=>n.remove(),3400);
 }
 
-// Lazy Loading Images
-if ('IntersectionObserver' in window) {
-    const imageObserver = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const img = entry.target;
-                if (img.dataset.src) {
-                    img.src = img.dataset.src;
-                    img.removeAttribute('data-src');
-                }
-                observer.unobserve(img);
-            }
-        });
-    });
-
-    document.querySelectorAll('img[data-src]').forEach(img => {
-        imageObserver.observe(img);
-    });
-}
-
-// Preload hero images
-function preloadImages() {
-    const heroImages = [
-        'images/hero-burj-khalifa.jpg',
-        'images/hero-burj-al-arab.jpg',
-        'images/hero-palm-jumeirah.jpg',
-        'images/hero-dubai-marina.jpg',
-        'images/hero-dubai-frame.jpg',
-        'images/hero-museum.jpg',
-        'images/hero-desert-safari.jpg',
-        'images/hero-ferrari-world.jpg',
-        'images/hero-grand-mosque.jpg',
-        'images/hero-umrah.jpg'
-    ];
-
-    heroImages.forEach(src => {
-        const img = new Image();
-        img.src = src;
-    });
-}
-
-// Call preload on load
-window.addEventListener('load', preloadImages);
+if ('IntersectionObserver' in window) { const io=new IntersectionObserver((entries,o)=>entries.forEach(e=>{if(e.isIntersecting){const img=e.target;if(img.dataset.src){img.src=img.dataset.src;img.removeAttribute('data-src')}o.unobserve(img)}})); document.querySelectorAll('img[data-src]').forEach(img=>io.observe(img)); }
+function preloadImages(){['images/hero-burj-khalifa.jpg','images/hero-burj-al-arab.jpg','images/hero-palm-jumeirah.jpg','images/hero-dubai-marina.jpg','images/hero-dubai-frame.jpg','images/hero-museum.jpg','images/hero-desert-safari.jpg','images/hero-ferrari-world.jpg','images/hero-grand-mosque.jpg','images/hero-umrah.jpg'].forEach(src=>{const i=new Image();i.src=src})}
+window.addEventListener('load',preloadImages);
