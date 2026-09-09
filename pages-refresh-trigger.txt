@@ -1,1 +1,0 @@
-GitHub Pages refresh trigger for Salalah deployment. This file is temporary.
