@@ -60,51 +60,58 @@
 
 /* Meta Pixel + Salalah WhatsApp enquiry tracking. */
 (function(){
-  const pixelId='2025667841413835';
-  let lastTrackedAt=0;
-  let initializedBySkymundo=false;
+  const PIXEL_ID='2025667841413835';
+  let lastLeadAt=0;
 
-  function ensureMetaPixel(){
+  function loadPixel(){
     if(typeof window.fbq!=='function'){
       !function(f,b,e,v,n,t,s){
-        if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];
-        t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s);
+        if(f.fbq)return;
+        n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;
+        n.push=n;n.loaded=true;n.version='2.0';n.queue=[];
+        t=b.createElement(e);t.async=true;t.src=v;
+        s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s);
       }(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
     }
-    if(typeof window.fbq==='function'&&!initializedBySkymundo){
-      window.fbq('init',pixelId);
-      initializedBySkymundo=true;
+    if(!window.__skymundoSalalahPixelInit){
+      window.fbq('init',PIXEL_ID);
+      window.__skymundoSalalahPixelInit=true;
+      window.fbq('track','PageView');
     }
-    return window.fbq;
   }
 
-  function trackLead(){
+  function sendLead(){
     const now=Date.now();
-    if(now-lastTrackedAt<1500)return;
-    lastTrackedAt=now;
-    const fbq=ensureMetaPixel();
-    if(typeof fbq==='function'){
-      fbq('trackSingle',pixelId,'Lead',{content_name:'Salalah WhatsApp Enquiry'});
-    }
+    if(now-lastLeadAt<2000)return;
+    lastLeadAt=now;
+    loadPixel();
+    window.fbq('track','Lead',{
+      content_name:'Salalah WhatsApp Enquiry',
+      content_category:'Travel'
+    });
   }
 
-  function attachLeadTracking(){
-    ensureMetaPixel();
-    const form=document.getElementById('bookingForm');
-    if(!form)return;
-    const submitButton=form.querySelector('button[type="submit"]');
-    if(submitButton){
-      submitButton.addEventListener('click',function(){
-        if(!form.checkValidity())return;
-        trackLead();
-      },true);
-    }
-    form.addEventListener('submit',function(){
-      if(!form.checkValidity())return;
-      trackLead();
+  function validSalalahForm(form){
+    return form && form.id==='bookingForm' && form.checkValidity();
+  }
+
+  function bindTracking(){
+    loadPixel();
+    document.addEventListener('click',function(event){
+      const button=event.target.closest && event.target.closest('#bookingForm button[type="submit"]');
+      if(!button)return;
+      const form=button.form || document.getElementById('bookingForm');
+      if(validSalalahForm(form))sendLead();
+    },true);
+    document.addEventListener('submit',function(event){
+      if(validSalalahForm(event.target))sendLead();
     },true);
   }
 
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',attachLeadTracking);else attachLeadTracking();
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',bindTracking,{once:true});
+  }else{
+    bindTracking();
+  }
 })();
