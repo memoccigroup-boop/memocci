@@ -81,24 +81,27 @@
     if(!window.__skymundoSalalahPixelInit){
       window.fbq('init',PIXEL_ID);
       window.__skymundoSalalahPixelInit=true;
-      window.fbq('trackSingle',PIXEL_ID,'PageView',{content_name:'Salalah Landing Page'});
+      window.fbq('track','PageView');
     }
+    return window.fbq;
   }
 
   function trackLead(){
-    loadPixel();
-    window.fbq('trackSingle',PIXEL_ID,'Lead',{
+    const fbq=loadPixel();
+    fbq('track','Lead',{
       content_name:'Salalah WhatsApp Enquiry',
       content_category:'Travel'
     });
   }
 
+  /* Load the standard Meta base pixel immediately when this file executes. */
+  loadPixel();
+
   function bindTracking(){
-    loadPixel();
     const form=document.getElementById('bookingForm');
     if(!form)return;
     form.addEventListener('submit',function(){
-      trackLead();
+      if(form.checkValidity())trackLead();
     },true);
   }
 
