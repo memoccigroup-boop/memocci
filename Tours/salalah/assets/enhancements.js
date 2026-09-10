@@ -58,10 +58,14 @@
   refresh();setInterval(()=>{if(!document.hidden)refresh();},3600000);window.addEventListener('online',refresh);
 })();
 
-/* Meta Pixel + Salalah WhatsApp enquiry tracking. */
+/* Dedicated Meta Pixel tracking for the Salalah landing page only. */
 (function(){
   const PIXEL_ID='2025667841413835';
-  let lastLeadAt=0;
+  const SALALAH_PATH='/Tours/salalah';
+  if(!window.location.pathname.toLowerCase().startsWith(SALALAH_PATH.toLowerCase()))return;
+
+  const canonical=document.querySelector('link[rel="canonical"]');
+  if(canonical)canonical.href='https://skymundo.ae/Tours/salalah/';
 
   function loadPixel(){
     if(typeof window.fbq!=='function'){
@@ -77,35 +81,24 @@
     if(!window.__skymundoSalalahPixelInit){
       window.fbq('init',PIXEL_ID);
       window.__skymundoSalalahPixelInit=true;
-      window.fbq('track','PageView');
+      window.fbq('trackSingle',PIXEL_ID,'PageView',{content_name:'Salalah Landing Page'});
     }
   }
 
-  function sendLead(){
-    const now=Date.now();
-    if(now-lastLeadAt<2000)return;
-    lastLeadAt=now;
+  function trackLead(){
     loadPixel();
-    window.fbq('track','Lead',{
+    window.fbq('trackSingle',PIXEL_ID,'Lead',{
       content_name:'Salalah WhatsApp Enquiry',
       content_category:'Travel'
     });
   }
 
-  function validSalalahForm(form){
-    return form && form.id==='bookingForm' && form.checkValidity();
-  }
-
   function bindTracking(){
     loadPixel();
-    document.addEventListener('click',function(event){
-      const button=event.target.closest && event.target.closest('#bookingForm button[type="submit"]');
-      if(!button)return;
-      const form=button.form || document.getElementById('bookingForm');
-      if(validSalalahForm(form))sendLead();
-    },true);
-    document.addEventListener('submit',function(event){
-      if(validSalalahForm(event.target))sendLead();
+    const form=document.getElementById('bookingForm');
+    if(!form)return;
+    form.addEventListener('submit',function(){
+      trackLead();
     },true);
   }
 
