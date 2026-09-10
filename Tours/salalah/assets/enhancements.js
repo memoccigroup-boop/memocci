@@ -61,7 +61,6 @@
 /* Meta Pixel + Salalah WhatsApp enquiry tracking. */
 (function(){
   const pixelId='2025667841413835';
-  const sessionKey='skymundo-salalah-lead-sent';
 
   function ensureMetaPixel(){
     if(typeof window.fbq==='function')return window.fbq;
@@ -83,15 +82,12 @@
   }
 
   function attachLeadTracking(){
+    ensureMetaPixel();
     const form=document.getElementById('bookingForm');
     if(!form)return;
     form.addEventListener('submit',function(){
       if(!form.checkValidity())return;
-      let alreadyTracked=false;
-      try{alreadyTracked=sessionStorage.getItem(sessionKey)==='1';}catch(e){}
-      if(alreadyTracked)return;
       trackLead();
-      try{sessionStorage.setItem(sessionKey,'1');}catch(e){}
     },true);
   }
 
