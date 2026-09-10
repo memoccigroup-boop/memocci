@@ -57,3 +57,43 @@
   }
   refresh();setInterval(()=>{if(!document.hidden)refresh();},3600000);window.addEventListener('online',refresh);
 })();
+
+/* Meta Pixel + Salalah WhatsApp enquiry tracking. */
+(function(){
+  const pixelId='2025667841413835';
+  const sessionKey='skymundo-salalah-lead-sent';
+
+  function ensureMetaPixel(){
+    if(typeof window.fbq==='function')return window.fbq;
+    !function(f,b,e,v,n,t,s){
+      if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];
+      t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s);
+    }(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    window.fbq('init',pixelId);
+    window.fbq('track','PageView');
+    return window.fbq;
+  }
+
+  function trackLead(){
+    const fbq=ensureMetaPixel();
+    if(typeof fbq==='function'){
+      fbq('track','Lead',{content_name:'Salalah WhatsApp Enquiry'});
+    }
+  }
+
+  function attachLeadTracking(){
+    const form=document.getElementById('bookingForm');
+    if(!form)return;
+    form.addEventListener('submit',function(){
+      if(!form.checkValidity())return;
+      let alreadyTracked=false;
+      try{alreadyTracked=sessionStorage.getItem(sessionKey)==='1';}catch(e){}
+      if(alreadyTracked)return;
+      trackLead();
+      try{sessionStorage.setItem(sessionKey,'1');}catch(e){}
+    },true);
+  }
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',attachLeadTracking);else attachLeadTracking();
+})();
