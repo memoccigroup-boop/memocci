@@ -61,6 +61,7 @@
 /* Meta Pixel + Salalah WhatsApp enquiry tracking. */
 (function(){
   const pixelId='2025667841413835';
+  let lastTrackedAt=0;
 
   function ensureMetaPixel(){
     if(typeof window.fbq==='function')return window.fbq;
@@ -75,9 +76,12 @@
   }
 
   function trackLead(){
+    const now=Date.now();
+    if(now-lastTrackedAt<1500)return;
+    lastTrackedAt=now;
     const fbq=ensureMetaPixel();
     if(typeof fbq==='function'){
-      fbq('track','Lead',{content_name:'Salalah WhatsApp Enquiry'});
+      fbq('trackSingle',pixelId,'Lead',{content_name:'Salalah WhatsApp Enquiry'});
     }
   }
 
@@ -85,6 +89,13 @@
     ensureMetaPixel();
     const form=document.getElementById('bookingForm');
     if(!form)return;
+    const submitButton=form.querySelector('button[type="submit"]');
+    if(submitButton){
+      submitButton.addEventListener('click',function(){
+        if(!form.checkValidity())return;
+        trackLead();
+      },true);
+    }
     form.addEventListener('submit',function(){
       if(!form.checkValidity())return;
       trackLead();
