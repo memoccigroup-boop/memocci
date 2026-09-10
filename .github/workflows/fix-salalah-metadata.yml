@@ -1,0 +1,45 @@
+name: Fix Salalah metadata
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-salalah-metadata.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix-metadata:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Correct Salalah canonical and social metadata
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('Tours/salalah/index.html')
+          s = p.read_text(encoding='utf-8')
+          old = '<link rel="canonical" href="https://skymundo.ae/salalah/"/>'
+          new = '<link rel="canonical" href="https://skymundo.ae/Tours/salalah/"/>'
+          if old in s:
+              s = s.replace(old, new, 1)
+          og = '''<meta property="og:type" content="website"/>
+          <meta property="og:url" content="https://skymundo.ae/Tours/salalah/"/>
+          <meta property="og:title" content="Salalah Khareef 5 Days / 4 Nights by Luxury Bus | AED 1,299 | Skymundo"/>
+          <meta property="og:description" content="Explore Salalah during Khareef with Skymundo Tourism L.L.C. Five days and four nights by luxury bus, including two hotel nights, guided sightseeing and meals as per itinerary from AED 1,299 per adult."/>
+          <meta property="og:image" content="https://skymundo.ae/Tours/salalah/assets/hero-september/01-1920.webp"/>
+          <meta property="og:image:alt" content="Salalah Khareef package by Skymundo Tourism"/>'''
+          if 'property="og:url"' not in s:
+              s = s.replace(new, new + '\n' + og, 1)
+          p.write_text(s, encoding='utf-8')
+      - name: Commit metadata fix
+        run: |
+          if git diff --quiet -- Tours/salalah/index.html; then
+            echo "No metadata changes needed"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Tours/salalah/index.html
+          git commit -m "Fix Salalah canonical and Meta preview metadata"
+          git push
