@@ -164,6 +164,28 @@
 
   loadPixel();
 
+  /* Every Salalah WhatsApp CTA now feeds the tracked booking form first. */
+  function routeDirectWhatsAppToForm(){
+    const booking=document.getElementById('booking');
+    const form=document.getElementById('bookingForm');
+    if(!booking||!form)return;
+    document.querySelectorAll('a[href*="wa.me/971562168857"]').forEach(link=>{
+      if(link.dataset.salalahFormRoute==='1')return;
+      link.dataset.salalahFormRoute='1';
+      link.href='#booking';
+      link.removeAttribute('target');
+      link.addEventListener('click',function(event){
+        event.preventDefault();
+        booking.scrollIntoView({behavior:'smooth',block:'start'});
+        const first=document.getElementById('fullName');
+        window.setTimeout(()=>{
+          if(!first)return;
+          try{first.focus({preventScroll:true});}catch(error){first.focus();}
+        },350);
+      });
+    });
+  }
+
   function bindTracking(){
     const form=document.getElementById('bookingForm');
     if(!form||state.forms.has(form))return;
@@ -179,6 +201,7 @@
       /* Dispatch before the existing handler opens WhatsApp; retries remain usable. */
       try{trackLead(snapshot);}catch(error){/* Tracking must not block WhatsApp. */}
     },true);
+    routeDirectWhatsAppToForm();
   }
 
   if(document.readyState==='loading'){
