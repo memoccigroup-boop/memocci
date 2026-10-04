@@ -32,6 +32,7 @@ function initHeroSlider() {
     function goToSlide(index) {
         // Remove active class from current slide and dot
         slides[currentSlide].classList.remove('active');
+        if (slides[currentSlide].matches('a')) slides[currentSlide].tabIndex = -1;
         dots[currentSlide].classList.remove('active');
 
         // Update current slide index
@@ -39,6 +40,7 @@ function initHeroSlider() {
 
         // Add active class to new slide and dot
         slides[currentSlide].classList.add('active');
+        if (slides[currentSlide].matches('a')) slides[currentSlide].tabIndex = 0;
         dots[currentSlide].classList.add('active');
 
         // Reset interval
@@ -52,7 +54,9 @@ function initHeroSlider() {
 
     function resetInterval() {
         clearInterval(slideInterval);
-        slideInterval = setInterval(nextSlide, 5000);
+        if (!slides[currentSlide].contains(document.activeElement)) {
+            slideInterval = setInterval(nextSlide, 5000);
+        }
     }
 
     // Start auto-slide
@@ -62,6 +66,8 @@ function initHeroSlider() {
     const heroSlider = document.querySelector('.hero-slider');
     heroSlider.addEventListener('mouseenter', () => clearInterval(slideInterval));
     heroSlider.addEventListener('mouseleave', resetInterval);
+    heroSlider.addEventListener('focusin', () => clearInterval(slideInterval));
+    heroSlider.addEventListener('focusout', resetInterval);
 }
 
 // Header Scroll Effect
@@ -387,7 +393,7 @@ if ('IntersectionObserver' in window) {
 // Preload hero images
 function preloadImages() {
     const heroImages = [
-        'images/hero-burj-khalifa.jpg',
+        'images/hero-salalah-wadi-darbat.webp',
         'images/hero-burj-al-arab.jpg',
         'images/hero-palm-jumeirah.jpg',
         'images/hero-dubai-marina.jpg',

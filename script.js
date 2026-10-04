@@ -1,5 +1,5 @@
 // Preserve the original Skymundo site JavaScript exactly, then add the Salalah Tours card.
-document.write('<script src="/script-core.js"></script>');
+document.write('<script src="/script-core.js?v=20261004-salalah"></script>');
 
 document.addEventListener('DOMContentLoaded', function () {
     const grid = document.querySelector('#tours .tours-grid');
