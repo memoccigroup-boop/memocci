@@ -521,22 +521,25 @@ html[lang="ar"] .hero-fact:last-child{border-inline-end:0}
     const formStatus = document.getElementById('formStatus');
     if (bookingForm) bookingForm.addEventListener('submit', function(event){
       event.preventDefault();
-      if (!bookingForm.reporisArabicditdocument.documentElement.lang === 'ar';
-      const label = (english, arabic))) risArabic ? arabic : english;
+      if (!bookingForm.reportValidity()) return;
+      const isArabic = document.documentElement.lang === 'ar';
+      const label = (english, arabic) => isArabic ? arabic : english;
       const value = id => {
-        const field = eturn;
-      const value = ;
-        return isArabic && field.tagName === 'SELECT' ? field.selectedOptions[0].textContent.trim() : fieldid => document.getEle};
-      mentById(id).value.trim();label("      const message = [
-        'Hello Skymundo, I would like to book the Salalah ","مرحباً سكاي موندو، أرغب في حجز باقة خريف صلالة بالحافلة الفاخرة لمدة 5 أيام.")hareef 5-Day Luxury Bulabel(" Package.',","الاسم الكامل: ")        '',
-        'Full Namelabel(" ' + value('fullN","رقم واتساب: ")me'),
-        'WhatsApp Numlabel("er: ' + value","الجنسية: ")'phone'),
-        'Nationality: 'label("+ value(","البالغون: ")nationality'),
-        'Adullabel("s: ' + val","الأطفال: ")e('adults'),
-        'Chilabel("Not specified","غير محدد")),
-        label("Preferred Travel Date: ","تاريخ السفر المفضل: ") + value(ltravelDatelue('childrelabel("Pickup Location),","موقع الانطلاق: ")        'Ppickupravel Date: label("Payment MethodlD","طريقة الدفع: ")te'),
-     aymentickup Locatilabel("Questions / Special Requestpi","أسئلة / طلب خاص: ") + ('),
-   notesayciallabel("None","لا يوجد")st: ' + (value('notes') || 'None')
+        const field = document.getElementById(id);
+        return isArabic && field.tagName === 'SELECT' ? field.selectedOptions[0].textContent.trim() : field.value.trim();
+      };
+      const message = [
+        label("Hello Skymundo, I would like to book the Salalah Khareef 5-Day Luxury Bus Package.","مرحباً سكاي موندو، أرغب في حجز باقة خريف صلالة بالحافلة الفاخرة لمدة 5 أيام."),
+        '',
+        label("Full Name: ","الاسم الكامل: ") + value('fullName'),
+        label("WhatsApp Number: ","رقم واتساب: ") + value('phone'),
+        label("Nationality: ","الجنسية: ") + value('nationality'),
+        label("Adults: ","البالغون: ") + value('adults'),
+        label("Children: ","الأطفال: ") + (value('children') || label("Not specified","غير محدد")),
+        label("Preferred Travel Date: ","تاريخ السفر المفضل: ") + value('travelDate'),
+        label("Pickup Location: ","موقع الانطلاق: ") + value('pickup'),
+        label("Payment Method: ","طريقة الدفع: ") + value('payment'),
+        label("Questions / Special Request: ","أسئلة / طلب خاص: ") + (value('notes') || label("None","لا يوجد"))
       ].join('\n');
       formStatus.textContent = 'Opening WhatsApp with your completed request…';
       window.open('https://wa.me/971562168857?text=' + encodeURIComponent(message), '_blank', 'noopener');
@@ -750,7 +753,12 @@ html[lang="ar"] .hero-fact:last-child{border-inline-end:0}
     });
     window.addEventListener('resize',function(){
       var target=slideLeft(current);
-      track.scrollLeft=targetscript id="salalah-language-script">
+      track.scrollLeft=target;
+    });
+  });
+})();
+</script>
+<script id="salalah-language-script">
 /* This language switch belongs only to the Salalah landing page. */
 (function () {
   'use strict';
@@ -831,10 +839,6 @@ html[lang="ar"] .hero-fact:last-child{border-inline-end:0}
   observer.observe(document.body,{childList:true,subtree:true,characterData:true});
 })();
 
-</script });body>
-</
-  });
-})();
 </script>
 </body>
 </html>
