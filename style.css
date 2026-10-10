@@ -1558,18 +1558,15 @@ a.social-brand img { display: block; width: 30px; height: 30px; object-fit: cont
 
 a.social-instagram img { border-radius: 25%; }
 
-/* Prominent Skymundo branding, with the source artwork's outer whitespace excluded by its SVG viewport. */
-.logo { display: block; flex: 0 0 auto; }
-.logo img { display: block; width: 190px; height: auto; }
-.header-content { gap: 18px; }
-.footer-logo { display: block; width: 270px; max-width: 100%; height: auto; padding: 10px; background: #fff; border-radius: 12px; margin-bottom: 24px; }
+/* Balanced branding and vertically aligned navigation. */
+.logo { display: flex; align-items: center; flex: 0 0 auto; }
+.logo img { display: block; width: 140px; height: auto; }
+.header > .container { max-width: 1440px; width: 100%; padding-left: 28px; padding-right: 28px; }
+.header-content { align-items: center; gap: 24px; padding: 10px 0; }
+.footer-logo { display: block; width: 140px; max-width: 100%; height: auto; aspect-ratio: 1; padding: 0; background: transparent; border-radius: 50%; margin-bottom: 22px; }
 @media (max-width: 768px) {
-  .logo img { width: 170px; }
+  .header > .container { padding-left: 18px; padding-right: 18px; }
+  .logo img { width: 120px; }
   .header-content { padding: 8px 0; }
-  .footer-logo { width: 270px; margin-left: auto; margin-right: auto; }
+  .footer-logo { width: 130px; margin-left: auto; margin-right: auto; }
 }
-
-/* Edge-aligned header and supplied circular footer brand. */
-.header > .container { max-width: none; width: 100%; padding-left: 24px; padding-right: 24px; }
-.footer-logo { padding: 0; background: transparent; border-radius: 50%; aspect-ratio: 1; }
-@media (max-width: 768px) { .header > .container { padding-left: 16px; padding-right: 16px; } }
