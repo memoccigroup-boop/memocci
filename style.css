@@ -1548,3 +1548,12 @@ a.social-brand:focus-visible {
     .nav-menu { order: 3; width: 100%; }
     .nav-menu ul { justify-content: center; flex-wrap: wrap; gap: 12px 20px; }
 }
+
+/* Supplied brand artwork: transparent outer backgrounds. */
+a.social-brand, a.social-brand:hover { background: transparent !important; box-shadow: none; }
+a.social-brand img { display: block; width: 30px; height: 30px; object-fit: contain; }
+.payment-icon { background: transparent; padding: 0; width: 76px; height: 44px; min-width: 0; }
+.payment-icon img { display: block; width: 100%; height: 100%; object-fit: contain; }
+
+
+a.social-instagram img { border-radius: 25%; }
