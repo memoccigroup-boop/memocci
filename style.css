@@ -1557,3 +1557,14 @@ a.social-brand img { display: block; width: 30px; height: 30px; object-fit: cont
 
 
 a.social-instagram img { border-radius: 25%; }
+
+/* Prominent Skymundo branding, with the source artwork's outer whitespace excluded by its SVG viewport. */
+.logo { display: block; flex: 0 0 auto; }
+.logo img { display: block; width: 190px; height: auto; }
+.header-content { gap: 18px; }
+.footer-logo { display: block; width: 270px; max-width: 100%; height: auto; padding: 10px; background: #fff; border-radius: 12px; margin-bottom: 24px; }
+@media (max-width: 768px) {
+  .logo img { width: 170px; }
+  .header-content { padding: 8px 0; }
+  .footer-logo { width: 270px; margin-left: auto; margin-right: auto; }
+}
