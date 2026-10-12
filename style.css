@@ -1576,3 +1576,12 @@ a.social-instagram img { border-radius: 25%; }
 .payment-icon { width: 100%; height: 48px; padding: 5px; background: #fff; border-radius: 7px; overflow: hidden; }
 .payment-icon img { width: 100%; height: 100%; object-fit: contain; }
 @media (max-width: 768px) { .payment-icons { justify-content: center; } }
+
+/* Keep social icons level, including after a tap on touch screens. */
+.footer-social, .contact-social .social-icons, .top-bar .social-links { align-items: center; }
+.footer-social a.social-brand, .contact-social a.social-brand { flex: 0 0 44px; width: 44px; height: 44px; padding: 0; margin: 0; line-height: 1; }
+.footer-social a.social-brand img, .contact-social a.social-brand img { display: block; width: 30px; height: 30px; object-fit: contain; margin: 0; }
+.footer-social a.social-brand:hover, .footer-social a.social-brand:active,
+.contact-social a.social-brand:hover, .contact-social a.social-brand:active,
+.top-bar a.social-brand:hover, .top-bar a.social-brand:active { transform: none; }
+.contact-social a.social-tiktok img { filter: brightness(0); }
