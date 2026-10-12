@@ -969,6 +969,89 @@ src="https://www.facebook.com/tr?id=2025667841413835&ev=PageView&noscript=1"
     </div>
 
     <script src="script.js?v=20261004-salalah"></script>
+
+    <!-- Once-per-visit WhatsApp enquiry -->
+    <style>
+      #skymundo-enquiry { box-sizing:border-box; width:calc(100% - 32px); max-width:430px; max-height:calc(100dvh - 32px); margin:auto; padding:30px; border:0; border-radius:22px; background:#fff; color:#19192b; box-shadow:0 24px 80px #102b4a40; overflow-y:auto; font-family:'Poppins',sans-serif; }
+      #skymundo-enquiry::backdrop { background:rgba(15,25,45,.58); }
+      #skymundo-enquiry * { box-sizing:border-box; }
+      #skymundo-enquiry .enquiry-close { position:absolute; top:10px; right:10px; display:grid; place-items:center; width:44px; height:44px; border:0; border-radius:50%; background:#f0f3f7; color:#19192b; font-size:28px; cursor:pointer; }
+      #skymundo-enquiry .enquiry-brand { margin:0 40px 12px 0; color:#2457a7; font-size:13px; font-weight:700; letter-spacing:1px; }
+      #skymundo-enquiry h2 { margin:0 20px 8px 0; font-size:25px; line-height:1.3; }
+      #skymundo-enquiry .enquiry-intro { margin:0 0 20px; color:#637083; font-size:14px; line-height:1.6; }
+      #skymundo-enquiry label { display:block; margin:14px 0 6px; font-size:13px; font-weight:600; }
+      #skymundo-enquiry input, #skymundo-enquiry select { width:100%; min-height:48px; padding:11px 12px; border:1px solid #cfd8e3; border-radius:9px; background:#fff; color:#19192b; font:inherit; font-size:16px; }
+      #skymundo-enquiry :focus-visible { outline:3px solid #f49a38; outline-offset:3px; }
+      #skymundo-enquiry .enquiry-submit { width:100%; min-height:50px; margin-top:22px; padding:12px; border:0; border-radius:10px; background:#168345; color:#fff; font:inherit; font-size:15px; font-weight:600; cursor:pointer; }
+      #skymundo-enquiry .enquiry-note { margin:12px 0 0; color:#637083; font-size:12px; line-height:1.6; }
+      @media(max-width:480px) { #skymundo-enquiry { padding:26px 22px; } }
+    </style>
+    <dialog id="skymundo-enquiry" aria-labelledby="enquiry-title" aria-describedby="enquiry-intro">
+      <button type="button" class="enquiry-close" aria-label="Close enquiry form" autofocus>&times;</button>
+      <p class="enquiry-brand">SKYMUNDO TOURISM</p>
+      <h2 id="enquiry-title">Let's plan your next trip</h2>
+      <p id="enquiry-intro" class="enquiry-intro">Tell us what you have in mind. Our team is here to help.</p>
+      <form id="skymundo-enquiry-form">
+        <label for="enquiry-name">Your name</label>
+        <input id="enquiry-name" name="name" autocomplete="name" placeholder="Enter your name" required maxlength="80">
+        <label for="enquiry-phone">WhatsApp number</label>
+        <input id="enquiry-phone" name="phone" type="tel" dir="ltr" autocomplete="tel" inputmode="tel" placeholder="+971 56 123 4567" required maxlength="25" aria-describedby="enquiry-phone-help">
+        <p id="enquiry-phone-help" class="enquiry-note">Include your country code.</p>
+        <label for="enquiry-service">Tour or service of interest</label>
+        <select id="enquiry-service" name="service" required>
+          <option value="">Choose a tour or service</option>
+          <option>Salalah Tour</option><option>Nizwa &amp; Muscat Tour</option>
+          <option>UAE Tours &amp; Attractions</option><option>International Holiday Package</option>
+          <option>Visa Assistance</option><option>Flight Booking</option>
+          <option>Hotel Reservation</option><option>Umrah Package</option>
+          <option>Travel Insurance</option><option>Other Enquiry</option>
+        </select>
+        <button type="submit" class="enquiry-submit">Chat with Us on WhatsApp</button>
+        <p class="enquiry-note">WhatsApp will open with your details ready. Tap Send there to share your enquiry with us.</p>
+      </form>
+    </dialog>
+    <script>
+    (() => {
+      const dialog = document.getElementById('skymundo-enquiry');
+      const form = document.getElementById('skymundo-enquiry-form');
+      const name = document.getElementById('enquiry-name');
+      const phone = document.getElementById('enquiry-phone');
+      const key = 'skymundo-enquiry-shown';
+      let previousFocus, previousOverflow;
+      const close = () => dialog.close();
+      dialog.querySelector('.enquiry-close').addEventListener('click', close);
+      dialog.addEventListener('click', event => {
+        const box = dialog.getBoundingClientRect();
+        if (event.target === dialog && (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom)) close();
+      });
+      dialog.addEventListener('close', () => {
+        document.body.style.overflow = previousOverflow;
+        if (previousFocus && previousFocus.isConnected) previousFocus.focus({preventScroll:true});
+      });
+      name.addEventListener('input', () => name.setCustomValidity(''));
+      phone.addEventListener('input', () => phone.setCustomValidity(''));
+      form.addEventListener('submit', event => {
+        event.preventDefault();
+        name.setCustomValidity(name.value.trim() ? '' : 'Please enter your name.');
+        const digits = phone.value.replace(/\D/g, '');
+        phone.setCustomValidity(/^[+\d\s().-]+$/.test(phone.value) && digits.length >= 8 && digits.length <= 15 ? '' : 'Please enter a valid WhatsApp number including your country code.');
+        if (!form.reportValidity()) return;
+        const message = 'Hello Skymundo Tourism! I would like to enquire.\n\nName: ' + name.value.trim() + '\nWhatsApp: ' + phone.value.trim() + '\nTour / service: ' + document.getElementById('enquiry-service').value;
+        window.open('https://wa.me/971562168857?text=' + encodeURIComponent(message), '_blank', 'noopener,noreferrer');
+        close();
+      });
+      try { if (sessionStorage.getItem(key)) return; } catch (_) {}
+      setTimeout(() => {
+        if (typeof dialog.showModal !== 'function') return;
+        try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, '1'); } catch (_) {}
+        previousFocus = document.activeElement;
+        previousOverflow = document.body.style.overflow;
+        dialog.showModal();
+        document.body.style.overflow = 'hidden';
+      }, 8000);
+    })();
+    </script>
+
 </body>
 </html>
 
