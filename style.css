@@ -1590,3 +1590,10 @@ a.social-instagram img { border-radius: 25%; }
 .payment-icons { align-items:center; }
 .payment-icon { display:flex; align-items:center; justify-content:center; padding:0; background:transparent; border:0; box-shadow:none; border-radius:0; overflow:visible; }
 .payment-icon img { display:block; width:100%; height:44px; max-width:100%; object-fit:contain; clip-path:none; border-radius:0; background:transparent; }
+
+/* Align complete payment logos on two consistent rows, without outer tiles. */
+.payment-icons { grid-template-columns:repeat(4,minmax(0,1fr)); width:100%; max-width:368px; gap:16px 12px; align-items:center; }
+.payment-icon { height:36px; min-width:0; padding:0; margin:0; background:transparent; border:0; border-radius:0; box-shadow:none; overflow:visible; }
+.payment-icon img { width:auto; height:clamp(18px,6vw,26px); max-width:100%; object-fit:contain; object-position:center; margin:0; padding:0; display:block; }
+.payment-icon:hover { transform:none; }
+@media(max-width:768px) { .payment-icons { margin-inline:auto; } }
