@@ -970,8 +970,16 @@ src="https://www.facebook.com/tr?id=2025667841413835&ev=PageView&noscript=1"
 
     <script src="script.js?v=20261004-salalah"></script>
 
-    <!-- Once-per-visit WhatsApp enquiry -->
+    <button type="button" id="callback-launcher" aria-haspopup="dialog" aria-controls="skymundo-enquiry">
+      <i class="fas fa-phone-volume" aria-hidden="true"></i><span>Request Call Back</span>
+    </button>
+    <!-- Once-per-visit callback request -->
     <style>
+      #callback-launcher { position:fixed; bottom:30px; left:30px; z-index:998; display:flex; align-items:center; gap:9px; min-height:48px; padding:12px 16px; border:0; border-radius:28px; background:#f59a35; color:#19192b; box-shadow:0 5px 20px #0003; font:600 13px 'Poppins',sans-serif; cursor:pointer; }
+      #callback-launcher i { font-size:20px; }
+      #callback-launcher:hover { background:#ffb054; }
+      #callback-launcher:focus-visible { outline:3px solid #2457a7; outline-offset:3px; }
+      @media(max-width:768px) { #callback-launcher { bottom:20px; left:16px; max-width:calc(100vw - 104px); padding:12px 14px; font-size:12px; } }
       #skymundo-enquiry { box-sizing:border-box; width:calc(100% - 32px); max-width:430px; max-height:calc(100dvh - 32px); margin:auto; padding:30px; border:0; border-radius:22px; background:#fff; color:#19192b; box-shadow:0 24px 80px #102b4a40; overflow-y:auto; font-family:'Poppins',sans-serif; }
       #skymundo-enquiry::backdrop { background:rgba(15,25,45,.58); }
       #skymundo-enquiry * { box-sizing:border-box; }
@@ -982,19 +990,22 @@ src="https://www.facebook.com/tr?id=2025667841413835&ev=PageView&noscript=1"
       #skymundo-enquiry label { display:block; margin:14px 0 6px; font-size:13px; font-weight:600; }
       #skymundo-enquiry input, #skymundo-enquiry select { width:100%; min-height:48px; padding:11px 12px; border:1px solid #cfd8e3; border-radius:9px; background:#fff; color:#19192b; font:inherit; font-size:16px; }
       #skymundo-enquiry :focus-visible { outline:3px solid #f49a38; outline-offset:3px; }
-      #skymundo-enquiry .enquiry-submit { width:100%; min-height:50px; margin-top:22px; padding:12px; border:0; border-radius:10px; background:#168345; color:#fff; font:inherit; font-size:15px; font-weight:600; cursor:pointer; }
+      #skymundo-enquiry .enquiry-submit { width:100%; min-height:50px; margin-top:22px; padding:12px; border:0; border-radius:10px; background:#f59a35; color:#19192b; font:inherit; font-size:15px; font-weight:600; cursor:pointer; }
       #skymundo-enquiry .enquiry-note { margin:12px 0 0; color:#637083; font-size:12px; line-height:1.6; }
       @media(max-width:480px) { #skymundo-enquiry { padding:26px 22px; } }
     </style>
     <dialog id="skymundo-enquiry" aria-labelledby="enquiry-title" aria-describedby="enquiry-intro">
       <button type="button" class="enquiry-close" aria-label="Close enquiry form" autofocus>&times;</button>
       <p class="enquiry-brand">SKYMUNDO TOURISM</p>
-      <h2 id="enquiry-title">Let's plan your next trip</h2>
-      <p id="enquiry-intro" class="enquiry-intro">Tell us what you have in mind. Our team is here to help.</p>
-      <form id="skymundo-enquiry-form">
+      <h2 id="enquiry-title">Request a Call Back</h2>
+      <p id="enquiry-intro" class="enquiry-intro">Leave your name and phone number. Our travel team will call you during working hours.</p>
+      <form id="skymundo-enquiry-form" action="https://formsubmit.co/sales@skymundo.ae" method="POST">
+        <input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" style="display:none">
+        <input type="hidden" name="_subject" value="Skymundo — New Website Callback Request">
+        <input type="hidden" name="_template" value="table">
         <label for="enquiry-name">Your name</label>
         <input id="enquiry-name" name="name" autocomplete="name" placeholder="Enter your name" required maxlength="80">
-        <label for="enquiry-phone">WhatsApp number</label>
+        <label for="enquiry-phone">Phone number</label>
         <input id="enquiry-phone" name="phone" type="tel" dir="ltr" autocomplete="tel" inputmode="tel" placeholder="+971 56 123 4567" required maxlength="25" aria-describedby="enquiry-phone-help">
         <p id="enquiry-phone-help" class="enquiry-note">Include your country code.</p>
         <label for="enquiry-service">Tour or service of interest</label>
@@ -1006,8 +1017,10 @@ src="https://www.facebook.com/tr?id=2025667841413835&ev=PageView&noscript=1"
           <option>Hotel Reservation</option><option>Umrah Package</option>
           <option>Travel Insurance</option><option>Other Enquiry</option>
         </select>
-        <button type="submit" class="enquiry-submit">Chat with Us on WhatsApp</button>
-        <p class="enquiry-note">WhatsApp will open with your details ready. Tap Send there to share your enquiry with us.</p>
+        <button type="submit" class="enquiry-submit">Request a Call Back</button>
+        <p class="enquiry-note">By submitting, you agree that Skymundo Tourism may contact you about this enquiry. Your details are securely submitted through FormSubmit. <a href="/privacy-policy/">Privacy Policy</a></p>
+        <p id="callback-status" class="enquiry-note" role="status" aria-live="polite"></p>
+        <p id="callback-fallback" class="enquiry-note" hidden>Need help? <a href="tel:+971562168857">Call +971 56 216 8857</a> or <a href="https://wa.me/971562168857" target="_blank" rel="noopener">contact us on WhatsApp</a>.</p>
       </form>
     </dialog>
     <script>
@@ -1030,28 +1043,69 @@ src="https://www.facebook.com/tr?id=2025667841413835&ev=PageView&noscript=1"
       });
       name.addEventListener('input', () => name.setCustomValidity(''));
       phone.addEventListener('input', () => phone.setCustomValidity(''));
-      form.addEventListener('submit', event => {
+      let submitting = false;
+      form.addEventListener('submit', async event => {
         event.preventDefault();
         name.setCustomValidity(name.value.trim() ? '' : 'Please enter your name.');
         const digits = phone.value.replace(/\D/g, '');
-        phone.setCustomValidity(/^[+\d\s().-]+$/.test(phone.value) && digits.length >= 8 && digits.length <= 15 ? '' : 'Please enter a valid WhatsApp number including your country code.');
+        phone.setCustomValidity(/^[+\d\s().-]+$/.test(phone.value) && digits.length >= 8 && digits.length <= 15 ? '' : 'Please enter a valid phone number including your country code.');
         if (!form.reportValidity()) return;
-        const message = 'Hello Skymundo Tourism! I would like to enquire.\n\nName: ' + name.value.trim() + '\nWhatsApp: ' + phone.value.trim() + '\nTour / service: ' + document.getElementById('enquiry-service').value;
-        window.open('https://wa.me/971562168857?text=' + encodeURIComponent(message), '_blank', 'noopener,noreferrer');
-        close();
+        if (submitting) return;
+        const status = document.getElementById('callback-status');
+        const fallback = document.getElementById('callback-fallback');
+        const button = form.querySelector('[type="submit"]');
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 20000);
+        submitting = true;
+        button.disabled = true;
+        button.textContent = 'Sending request…';
+        status.textContent = '';
+        fallback.hidden = true;
+        form.setAttribute('aria-busy', 'true');
+        try {
+          const data = new FormData(form);
+          data.set('name', name.value.trim());
+          data.set('phone', phone.value.trim());
+          data.set('request_type', 'Please call this customer back');
+          data.set('source', 'Skymundo website callback popup');
+          const response = await fetch('https://formsubmit.co/ajax/sales@skymundo.ae', {
+            method: 'POST', body: data, headers: {Accept: 'application/json'}, signal: controller.signal
+          });
+          const result = await response.json();
+          if (!response.ok || !(result.success === true || result.success === 'true') ||
+              /activat|confirm.*email|verif/i.test(result.message || '')) throw new Error('Request not confirmed');
+          status.textContent = 'Thank you! Your callback request has been submitted. Our team will call you during working hours: Monday–Saturday, 9 AM–8 PM (UAE time).';
+          button.textContent = 'Request submitted';
+          form.querySelectorAll('input:not([type="hidden"]), select').forEach(field => { field.disabled = true; });
+        } catch (_) {
+          status.textContent = 'We could not confirm your request. Your details are still here. Please try again or contact us directly below.';
+          fallback.hidden = false;
+          button.disabled = false;
+          button.textContent = 'Request a Call Back';
+        } finally {
+          clearTimeout(timeout);
+          submitting = false;
+          form.removeAttribute('aria-busy');
+        }
       });
-      try { if (sessionStorage.getItem(key)) return; } catch (_) {}
-      setTimeout(() => {
-        if (typeof dialog.showModal !== 'function') return;
-        try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, '1'); } catch (_) {}
+      const openCallback = () => {
+        if (dialog.open || typeof dialog.showModal !== 'function') return;
         previousFocus = document.activeElement;
         previousOverflow = document.body.style.overflow;
         dialog.showModal();
         document.body.style.overflow = 'hidden';
+        try { sessionStorage.setItem(key, '1'); } catch (_) {}
+      };
+      document.getElementById('callback-launcher').addEventListener('click', openCallback);
+      try { if (sessionStorage.getItem(key)) return; } catch (_) {}
+      setTimeout(() => {
+        try { if (sessionStorage.getItem(key)) return; } catch (_) {}
+        openCallback();
       }, 8000);
     })();
     </script>
 
 </body>
 </html>
+
 
