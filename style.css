@@ -1604,3 +1604,37 @@ a.social-instagram img { border-radius: 25%; }
 .contact-social .social-icons { gap:2px; }
 .contact-social a.social-brand { flex:0 0 36px; width:36px; height:44px; }
 .footer-social::before { content:"Follow Us"; position:absolute; top:0; left:0; right:0; color:#fff; font-family:inherit; font-size:18px; font-weight:600; line-height:27px; text-align:inherit; }
+
+/* Direct WhatsApp greeting; keep the call button aligned to the right. */
+.floating-buttons { align-items:flex-end; }
+.floating-buttons .floating-whatsapp {
+    width:auto;
+    min-width:60px;
+    padding:0 20px;
+    gap:10px;
+    border-radius:999px;
+    white-space:nowrap;
+    animation:none;
+}
+.floating-buttons .floating-whatsapp::after {
+    content:"How can I help you?";
+    font-family:inherit;
+    font-size:15px;
+    font-weight:500;
+    line-height:1.4;
+}
+.floating-buttons .floating-whatsapp:hover { transform:translateY(-2px); }
+.floating-buttons .floating-whatsapp:focus-visible {
+    outline:3px solid #fff;
+    outline-offset:3px;
+}
+@media (max-width:768px) {
+    /* Keep the wider WhatsApp greeting above the callback button. */
+    .floating-buttons { bottom:84px; }
+    .floating-buttons .floating-whatsapp {
+        min-width:50px;
+        padding:0 16px;
+        max-width:calc(100vw - 40px);
+    }
+    .floating-buttons .floating-whatsapp::after { font-size:14px; }
+}
