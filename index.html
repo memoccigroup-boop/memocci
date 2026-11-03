@@ -1010,7 +1010,8 @@ a.social-brand.social-tiktok .embedded-social-icon { filter:none !important; }
       <p id="enquiry-intro" class="enquiry-intro">Leave your name and phone number. Our travel team will call you during working hours.</p>
       <form id="skymundo-enquiry-form" action="https://formsubmit.co/sales@skymundo.ae" method="POST">
         <input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" style="display:none">
-        <input type="hidden" name="_subject" value="Skymundo — New Website Callback Request">
+        <input type="hidden" name="access_key" value="97f7ba9e-047d-4d40-9579-d5a2db6aa414">
+        <input type="hidden" name="subject" value="Skymundo — New Website Callback Request">
         <input type="hidden" name="_template" value="table">
         <label for="enquiry-name">Your name</label>
         <input id="enquiry-name" name="name" autocomplete="name" placeholder="Enter your name" required maxlength="80">
@@ -1027,7 +1028,7 @@ a.social-brand.social-tiktok .embedded-social-icon { filter:none !important; }
           <option>Travel Insurance</option><option>Other Enquiry</option>
         </select>
         <button type="submit" class="enquiry-submit">Request a Call Back</button>
-        <p class="enquiry-note">By submitting, you agree that Skymundo Tourism may contact you about this enquiry. Your details are securely submitted through FormSubmit. <a href="/privacy-policy/">Privacy Policy</a></p>
+        <p class="enquiry-note">By submitting, you agree that Skymundo Tourism may contact you about this enquiry. Your callback details are sent securely to Skymundo. <a href="/privacy-policy/">Privacy Policy</a></p>
         <p id="callback-status" class="enquiry-note" role="status" aria-live="polite"></p>
         <p id="callback-fallback" class="enquiry-note" hidden><a id="callback-email-link" href="mailto:sales@skymundo.ae">Send request by email</a> or <a id="callback-whatsapp-link" href="https://wa.me/971562168857" target="_blank" rel="noopener">Send request on WhatsApp</a>. Your details will be filled in; tap Send to deliver your request. You can also <a href="tel:+971562168857">call +971 56 216 8857</a>.</p>
       </form>
@@ -1075,15 +1076,16 @@ a.social-brand.social-tiktok .embedded-social-icon { filter:none !important; }
           data.set('name', name.value.trim());
           data.set('phone', phone.value.trim());
           data.set('request_type', 'Please call this customer back');
+          data.set('message', 'Callback request from website');
           data.set('source', 'Skymundo website callback form');
           data.set('_url', 'https://skymundo.ae/');
-          const response = await fetch('https://formsubmit.co/ajax/sales@skymundo.ae', {
+          const response = await fetch('https://api.web3forms.com/submit', {
             method: 'POST', body: JSON.stringify(Object.fromEntries(data)),
             headers: {'Content-Type': 'application/json', Accept: 'application/json'}, signal: controller.signal
           });
           const result = await response.json();
           if (!response.ok || !(result.success === true || result.success === 'true') ||
-              /activat|confirm.*email|verif/i.test(result.message || '')) throw new Error('Request not confirmed');
+              /activat|confirm.*email|verif|invalid access key/i.test(result.message || '')) throw new Error('Request not confirmed');
           status.textContent = 'Thank you! Your callback request has been submitted. Our team will call you during working hours: Monday–Saturday, 9 AM–8 PM (UAE time).';
           button.textContent = 'Request submitted';
           form.querySelectorAll('input:not([type="hidden"]), select').forEach(field => { field.disabled = true; });
