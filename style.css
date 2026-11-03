@@ -1601,5 +1601,6 @@ a.social-instagram img { border-radius: 25%; }
 /* White heading above a compact row of footer social icons. */
 .footer-social { position:relative; padding-top:37px; padding-bottom:0; gap:2px; }
 .footer-social a.social-brand { flex:0 0 36px; width:36px; height:44px; }
-.contact-social .social-icons { gap:4px; }
+.contact-social .social-icons { gap:2px; }
+.contact-social a.social-brand { flex:0 0 36px; width:36px; height:44px; }
 .footer-social::before { content:"Follow Us"; position:absolute; top:0; left:0; right:0; color:#fff; font-family:inherit; font-size:18px; font-weight:600; line-height:27px; text-align:inherit; }
