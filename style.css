@@ -1598,7 +1598,8 @@ a.social-instagram img { border-radius: 25%; }
 .payment-icon:hover { transform:none; }
 @media(max-width:768px) { .payment-icons { margin-inline:auto; } }
 
-/* White label below the homepage footer social icons only. */
-.footer-social { position:relative; padding-bottom:37px; gap:4px; }
+/* White heading above a compact row of footer social icons. */
+.footer-social { position:relative; padding-top:37px; padding-bottom:0; gap:2px; }
+.footer-social a.social-brand { flex:0 0 36px; width:36px; height:44px; }
 .contact-social .social-icons { gap:4px; }
-.footer-social::after { content:"Follow Us"; position:absolute; bottom:0; left:0; right:0; color:#fff; font-family:inherit; font-size:18px; font-weight:600; line-height:27px; text-align:inherit; }
+.footer-social::before { content:"Follow Us"; position:absolute; top:0; left:0; right:0; color:#fff; font-family:inherit; font-size:18px; font-weight:600; line-height:27px; text-align:inherit; }
