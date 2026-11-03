@@ -1029,7 +1029,7 @@ a.social-brand.social-tiktok .embedded-social-icon { filter:none !important; }
         <button type="submit" class="enquiry-submit">Request a Call Back</button>
         <p class="enquiry-note">By submitting, you agree that Skymundo Tourism may contact you about this enquiry. Your details are securely submitted through FormSubmit. <a href="/privacy-policy/">Privacy Policy</a></p>
         <p id="callback-status" class="enquiry-note" role="status" aria-live="polite"></p>
-        <p id="callback-fallback" class="enquiry-note" hidden>Need help? <a href="tel:+971562168857">Call +971 56 216 8857</a> or <a href="https://wa.me/971562168857" target="_blank" rel="noopener">contact us on WhatsApp</a>.</p>
+        <p id="callback-fallback" class="enquiry-note" hidden><a id="callback-email-link" href="mailto:sales@skymundo.ae">Send request by email</a> or <a id="callback-whatsapp-link" href="https://wa.me/971562168857" target="_blank" rel="noopener">Send request on WhatsApp</a>. Your details will be filled in; tap Send to deliver your request. You can also <a href="tel:+971562168857">call +971 56 216 8857</a>.</p>
       </form>
     </dialog>
     <script>
@@ -1075,9 +1075,11 @@ a.social-brand.social-tiktok .embedded-social-icon { filter:none !important; }
           data.set('name', name.value.trim());
           data.set('phone', phone.value.trim());
           data.set('request_type', 'Please call this customer back');
-          data.set('source', 'Skymundo website callback popup');
+          data.set('source', 'Skymundo website callback form');
+          data.set('_url', 'https://skymundo.ae/');
           const response = await fetch('https://formsubmit.co/ajax/sales@skymundo.ae', {
-            method: 'POST', body: data, headers: {Accept: 'application/json'}, signal: controller.signal
+            method: 'POST', body: JSON.stringify(Object.fromEntries(data)),
+            headers: {'Content-Type': 'application/json', Accept: 'application/json'}, signal: controller.signal
           });
           const result = await response.json();
           if (!response.ok || !(result.success === true || result.success === 'true') ||
@@ -1086,7 +1088,15 @@ a.social-brand.social-tiktok .embedded-social-icon { filter:none !important; }
           button.textContent = 'Request submitted';
           form.querySelectorAll('input:not([type="hidden"]), select').forEach(field => { field.disabled = true; });
         } catch (_) {
-          status.textContent = 'We could not confirm your request. Your details are still here. Please try again or contact us directly below.';
+          status.textContent = 'The email service did not confirm your request. Please send your details using one of the options below, or try again. Your request is not confirmed until submission succeeds.';
+          const details = 'Please call me back.\nName: ' + name.value.trim() +
+            '\nPhone: ' + phone.value.trim() +
+            '\nTour or service: ' + document.getElementById('enquiry-service').value;
+          document.getElementById('callback-email-link').href =
+            'mailto:sales@skymundo.ae?subject=' + encodeURIComponent('Skymundo — Callback Request') +
+            '&body=' + encodeURIComponent(details);
+          document.getElementById('callback-whatsapp-link').href =
+            'https://wa.me/971562168857?text=' + encodeURIComponent(details);
           fallback.hidden = false;
           button.disabled = false;
           button.textContent = 'Request a Call Back';
