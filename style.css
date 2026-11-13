@@ -1534,7 +1534,7 @@ a.social-brand:focus-visible {
     margin-top: 22px;
     padding: 12px 22px;
     border-radius: 30px;
-    background: var(--gradient-secondary);
+    background: #ff8c00;
     color: #fff;
     font-weight: 600;
     font-size: 16px;
