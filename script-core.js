@@ -18,6 +18,13 @@ function initHeroSlider() {
     const totalSlides = slides.length;
     let slideInterval;
 
+    // A single hero stays static: no timer or navigation controls.
+    if (totalSlides <= 1) {
+        if (slides[0]) slides[0].classList.add('active');
+        if (dotsContainer) dotsContainer.hidden = true;
+        return;
+    }
+
     // Create dots
     slides.forEach((_, index) => {
         const dot = document.createElement('span');
