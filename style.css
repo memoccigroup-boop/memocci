@@ -1534,18 +1534,25 @@ a.social-brand:focus-visible {
     margin-top: 22px;
     padding: 12px 22px;
     border-radius: 30px;
-    background: linear-gradient(135deg, #ffad16 0%, #ff7900 55%, #ff5700 100%);
-    border: 1px solid rgba(255, 216, 145, 0.8);
-    box-shadow: 0 8px 28px rgba(255, 119, 0, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    transition: box-shadow 180ms ease, filter 180ms ease;
+    background: var(--gradient-secondary);
     color: #fff;
-    font-weight: 700;
+    font-weight: 600;
     font-size: 16px;
+    animation: salalah-cta-pop 3.5s ease-in-out infinite;
+    transform-origin: center;
 }
-.salalah-hero:hover .salalah-hero-cta,
+@keyframes salalah-cta-pop {
+    0%, 65%, 100% { transform: scale(1); }
+    74% { transform: translateY(-4px) scale(1.07); }
+    83% { transform: scale(1); }
+    91% { transform: translateY(-2px) scale(1.035); }
+}
+.salalah-hero-cta:hover,
 .salalah-hero:focus-visible .salalah-hero-cta {
-    filter: brightness(1.08);
-    box-shadow: 0 10px 32px rgba(255, 119, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+    .salalah-hero-cta { animation: none; }
 }
 .hero-overlay { pointer-events: none; }
 .hero-overlay a { pointer-events: auto; }
