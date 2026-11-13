@@ -1534,10 +1534,18 @@ a.social-brand:focus-visible {
     margin-top: 22px;
     padding: 12px 22px;
     border-radius: 30px;
-    background: var(--gradient-secondary);
+    background: linear-gradient(135deg, #ffad16 0%, #ff7900 55%, #ff5700 100%);
+    border: 1px solid rgba(255, 216, 145, 0.8);
+    box-shadow: 0 8px 28px rgba(255, 119, 0, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transition: box-shadow 180ms ease, filter 180ms ease;
     color: #fff;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 16px;
+}
+.salalah-hero:hover .salalah-hero-cta,
+.salalah-hero:focus-visible .salalah-hero-cta {
+    filter: brightness(1.08);
+    box-shadow: 0 10px 32px rgba(255, 119, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 .hero-overlay { pointer-events: none; }
 .hero-overlay a { pointer-events: auto; }
